@@ -1,0 +1,33 @@
+{
+  "name": "dbuzz-messaging-service",
+  "version": "1.0.0",
+  "description": "Private messaging service for D.buzz",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ./src/app",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/d-buzz/d.buzz-message.git"
+  },
+  "keywords": [
+    "dbuzz",
+    "hive",
+    "dbuzz-message",
+    "hive-message"
+  ],
+  "author": "lyereon.26@gmail.com",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/d-buzz/d.buzz-message/issues"
+  },
+  "homepage": "https://github.com/d-buzz/d.buzz-message#readme",
+  "dependencies": {
+    "@hiveio/dhive": "^0.14.1",
+    "@hiveio/hive-js": "^0.8.4",
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "express": "^4.17.1"
+  }
+}
