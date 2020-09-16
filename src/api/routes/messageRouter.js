@@ -6,5 +6,5 @@ const {
 } = require('./../controllers/message');
 
 messageRouter.post('/send', sendMessage)
-messageRouter.post('/list', getMessages)
+messageRouter.post('/history', getMessages)
 module.exports = messageRouter;
