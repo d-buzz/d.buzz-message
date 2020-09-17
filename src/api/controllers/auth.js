@@ -1,7 +1,7 @@
 const { utils, apiService } = require('./../services')
 
 // authenticate using username & password
-// params: username, password
+// params: username|string, password|string
 const authenticate = async (req, res) => {
     try {
         const { username, password } = req.body;
@@ -43,7 +43,7 @@ const authenticate = async (req, res) => {
 }
 
 // authenticate using username & private keys (active and memo)
-// params: username, active_key, memo_key
+// params: username|string, active_key|string, memo_key|string
 const authPrivateKeys = async (req, res) => {
     try {
         const { username, active_key, memo_key } = req.body;

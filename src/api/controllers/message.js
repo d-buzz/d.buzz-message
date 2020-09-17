@@ -2,7 +2,8 @@ const config = require('./../../config');
 const { utils, apiService } = require('./../services')
 
 // Sends message (encrypted or not)
-// params: message, active_key, memo_key, account_from, account_to, use_encrypt
+// params: message|string, active_key|string, memo_key|string, account_from|string, 
+// params: account_to|string, use_encrypt|number, amount|float, currency|string
 const sendMessage = async (req, res) => {
     try {
         const {
@@ -91,13 +92,58 @@ const sendMessage = async (req, res) => {
         return res.json(utils.jsonResponse(error, 'Message sending failed. Something went wrong...',400))
     }
 }
-// TODO: getMessages logic
-const getMessages = (req, res) => {
-    return res.json(utils.jsonResponse(null, 'Get messages here...'))
+
+// Gets all transfer transactions of specific account
+// params: account|string, memo_key|string
+const getAllTransfers = async (req, res) => {
+    try {
+        const { account, memo_key } = req.body;
+        if(!account){
+            return res.json(utils.jsonResponse(null, 'account is required', 400))
+        }
+        if(!memo_key){
+            return res.json(utils.jsonResponse(null, 'memo key is required', 400))
+        }
+    
+        const history = await apiService.getTransfers(account,memo_key);
+        if(!history.data){
+            return res.json(utils.jsonResponse(null, history.error, 400))
+        }
+
+        return res.json(utils.jsonResponse(history.data, 'Data fetched successfully'))
+    } catch (error) {
+        return res.json(utils.jsonResponse(error, 'No data fetched. Something went wrong...',400))
+    }
+}
+
+// Gets all transfer transactions of from and to accounts
+// params: account_from|string, account_to|string, memo_key|string
+const getAllTransfersToUser = async (req, res) => {
+    try {
+        const { account_from, account_to, memo_key } = req.body;
+        if(!account_from){
+            return res.json(utils.jsonResponse(null, 'sender\'s username is required', 400))
+        }
+        if(!account_to){
+            return res.json(utils.jsonResponse(null, 'receiver\'s username is required', 400))
+        }
+        if(!memo_key){
+            return res.json(utils.jsonResponse(null, 'memo key is required', 400))
+        }
+    
+        const history = await apiService.getTransfers(account_from,memo_key,account_to);
+        if(!history.data){
+            return res.json(utils.jsonResponse(null, history.error, 400))
+        }
+        return res.json(utils.jsonResponse(history.data, 'Data fetched successfully'))
+    } catch (error) {
+        return res.json(utils.jsonResponse(error, 'No data fetched. Something went wrong...',400))
+    }
 }
 
 module.exports = {
     sendMessage,
-    getMessages
+    getAllTransfers,
+    getAllTransfersToUser
 }
 
