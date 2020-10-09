@@ -1,6 +1,7 @@
-const config = require('./../../config')
+const config = require('../config/appConfig')
+const CONSTANTS =  require('../config/constants')
 
-const jsonResponse = (data, message = '', code = 200) => {
+const jsonResponse = (data, message = '', code = CONSTANTS.SERVER_OK_HTTP_CODE) => {
     return {
         data: data,
         message: message,

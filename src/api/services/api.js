@@ -1,4 +1,4 @@
-const config = require("./../../config");
+const config = require("../config/appConfig");
 const hive = require("@hiveio/hive-js");
 const dhive = require("@hiveio/dhive");
 const utils = require("./utils");
@@ -205,7 +205,7 @@ const getTransfers = async (
           const decoded = decryptMemo(data.memo, memo_key_decrypted).data || "";
           let transfer = {
             number: trx[0],
-            id: trx[1].trx_id,
+            trx_id: trx[1].trx_id,
             time: trx[1].timestamp,
             time_value,
             main_user,

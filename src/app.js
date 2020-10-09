@@ -4,7 +4,7 @@ const bodyParser = require("body-parser");
 require("dotenv").config();
 
 const api = require("./api");
-const config = require("./config");
+const config = require("./api/config/appConfig");
 
 const app = express();
 app.use(cors());

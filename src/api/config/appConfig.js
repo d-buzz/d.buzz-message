@@ -7,7 +7,9 @@ const config = {
     MIN_AMOUNT: ENV.MIN_AMOUNT,
     CURRENCY: ENV.CURRENCY,
     ALLOWED_CURRENCIES: ['HIVE','HBD'],
-    HF24_ENABLE: ENV.HF24_ENABLE
+    HF24_ENABLE: ENV.HF24_ENABLE,
+    DB_URL: ENV.DB_URL,
+    DB_NAME: ENV.DB_NAME
 }
 
 module.exports = config;
