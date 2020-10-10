@@ -1,7 +1,6 @@
 const Mongodb = require("../config/database");
 const CONSTANTS = require("../config/constants")
 const _usercol = CONSTANTS.USERS_DOC_NAME;
-const _messagecol = CONSTANTS.MESSAGES_DOC_NAME;
 
 const _this = {
   usernameCheck: (data) => {
@@ -113,23 +112,6 @@ const _this = {
       }
     });
   },
-
-  saveMessage: (data) => {
-    return new Promise(async (resolve, reject) => {
-      try {
-        const [DB, client] = await Mongodb.onConnect();
-        DB.collection(_messagecol).insertOne(data, (err, result) => {
-          client.close();
-          if (err) {
-            reject(err);
-          }
-          resolve(result);
-        });
-      } catch (error) {
-        reject(error);
-      }
-    });
-  }
 };
 
 module.exports = _this;

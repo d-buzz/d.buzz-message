@@ -77,8 +77,8 @@ const authenticate = async (req, res) => {
     if (!checkUserExist) {
       const saveUser = await queryHandler.saveUser({
         username,
-        active_key,
-        memo_key,
+        active_valid,
+        memo_valid,
         online: 1,
       });
       if (!saveUser) {
@@ -159,8 +159,8 @@ const authPrivateKeys = async (req, res) => {
 
     const getUserFromDB = await queryHandler.getUser({
       username,
-      active_key,
-      memo_key,
+      active_valid: true,
+      memo_valid: true,
     });
     if (!getUserFromDB) {
       // checks account if valid/exists
@@ -206,8 +206,8 @@ const authPrivateKeys = async (req, res) => {
       if (!checkUserExist) {
         const saveUser = await queryHandler.saveUser({
           username,
-          active_key,
-          memo_key,
+          active_valid,
+          memo_valid,
           online: 1,
         });
         if (!saveUser) {
