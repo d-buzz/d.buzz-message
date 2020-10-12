@@ -1,8 +1,4 @@
 const _this = {
-    /* Database document names starts */
-    USERS_DOC_NAME: `users`,
-    MESSAGES_DOC_NAME: `messages`,
-    /* Database document names starts */
     /* Validation related  constants starts*/
     USERNAME_NOT_FOUND : `username is required`,
     PASSWORD_NOT_FOUND: `password is required`,
