@@ -18,15 +18,12 @@ const getAccount = async (req, res) => {
 
 const getAccountContacts = async (req, res) => {
     try {
-        const { account, memo_key } = req.body;
+        const { account } = req.body;
         if(!account){
             return res.json(utils.jsonResponse(null, 'account is required', 400))
         }
-        if(!memo_key){
-            return res.json(utils.jsonResponse(null, 'memo key is required', 400))
-        }
     
-        const transfers = await apiService.getTransfers(account,memo_key);
+        const transfers = await apiService.getTransfers(account);
         if(!transfers.data){
             return res.json(utils.jsonResponse(null, transfers.error, 400))
         }

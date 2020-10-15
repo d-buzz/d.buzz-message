@@ -2,14 +2,15 @@ const _this = {
     /* Validation related  constants starts*/
     USERNAME_NOT_FOUND : `username is required`,
     PASSWORD_NOT_FOUND: `password is required`,
-    USERID_NOT_FOUND: `user_id is required`,
     ACCOUNT_NOT_FOUND: `account is required`,
     ACTIVEKEY_NOT_FOUND: `active key is required`, 
     MEMOKEY_NOT_FOUND: `memo key is required`, 
     MESSAGE_NOT_FOUND: `message is required`,
     AMOUNT_NOT_FOUND: `amount is required`,
-    SENDER_NOT_FOUND: `sender's username is required`,
-    RECEIVER_NOT_FOUND: `receiver's username is required`,
+    SENDER_NOT_FOUND: `account from is required`,
+    RECEIVER_NOT_FOUND: `account to is required`,
+    USER_NOT_FOUND: `user does not exists`,
+    TOKEN_NOT_FOUND: `token is required`,
 
     ACCOUNT_INVALID: `invalid account`,
     PASSWORD_INVALID: `invalid password`,
@@ -17,6 +18,8 @@ const _this = {
     MEMOKEY_INVALID: `invalid memo key`,
     CURRENCY_INVALID: `invalid currency`,
     RECEIVER_INVALID: `invalid receiver's account`,
+    TOKEN_INVALID: `invalid token`,
+    SIGN_INVALID: `invalid signature`,
 
     AUTH_FAILED: `Authentication failed. Something went wrong...`,
     AUTH_SUCCESS: `Authenticated successfully`,

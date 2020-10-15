@@ -1,3 +1,4 @@
+require("dotenv").config();
 const ENV = process.env;
 const config = {
     HOST: ENV.APP_HOST,
@@ -8,8 +9,7 @@ const config = {
     CURRENCY: ENV.CURRENCY,
     ALLOWED_CURRENCIES: ['HIVE','HBD'],
     HF24_ENABLE: ENV.HF24_ENABLE,
-    DB_URL: ENV.DB_URL,
-    DB_NAME: ENV.DB_NAME
+    JWT_SECRET_KEY: ENV.JWT_SECRET_KEY,
+    CRYPTR_SECRET_KEY: ENV.CRYPTR_SECRET_KEY
 }
-
 module.exports = config;

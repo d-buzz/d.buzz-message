@@ -54,7 +54,7 @@ const getPrivateKeysFromLogin = (account, password) => {
     ).toString();
     response.data = keys;
   } catch (error) {
-    response.error = error ? error : "Invalid private key";
+    response.error = error ? error : "Invalid posting key";
   }
 
   return response;
@@ -178,7 +178,7 @@ const getAccountHistory = async (account, start = -1, limit = 1000) => {
 
 const getTransfers = async (
   account_from,
-  memo_key_decrypted,
+  memo_key_decrypted="",
   account_to = ""
 ) => {
   let response = { data: null, error: null };
@@ -202,7 +202,10 @@ const getTransfers = async (
           amount_arr[0] = Number(amount_arr[0]);
           const time_value = moment.utc(trx[1].timestamp).valueOf();
           const main_user = data.from === account_from ? data.to : data.from;
-          const decoded = decryptMemo(data.memo, memo_key_decrypted).data || "";
+          let decoded = ''
+          if(memo_key_decrypted){
+            decoded = decryptMemo(data.memo, memo_key_decrypted).data || "";
+          }
           let transfer = {
             number: trx[0],
             trx_id: trx[1].trx_id,
@@ -237,5 +240,5 @@ module.exports = {
   decryptMemo,
   broadcastTransfer,
   getAccountHistory,
-  getTransfers,
+  getTransfers
 };
