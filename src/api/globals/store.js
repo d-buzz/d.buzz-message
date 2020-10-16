@@ -36,7 +36,7 @@ let _store = {
       _store.users[index].isOnline = status;
     }
   },
-  setUserContacts: (username, chatList) => {
+  setUserChats: (username, chatList) => {
     const index = _store.getUserIndex(username);
     if (index > -1) {
       if (chatList && chatList.length > 0) {

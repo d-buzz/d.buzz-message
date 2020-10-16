@@ -1,5 +1,6 @@
 const CONSTANTS = require("../config/constants");
 const apiService = require("./api");
+const utils = require("./utils")
 const globalStore = require("./../globals/store");
 
 class Socket {
@@ -35,56 +36,60 @@ class Socket {
   socketEvents() {
     this.io.on("connection", (socket) => {
       socket.on(`chat-list`, async (data) => {
-        if (data.username == "") {
+        if (data.token === undefined || data.token == "") {
           this.io.emit(`chat-list-response`, {
             error: true,
             message: CONSTANTS.USER_NOT_FOUND,
           });
         } else {
           try {
-            let chatList = [];
-            const userInfoResponse = globalStore.getUserByUsername(
-              data.username
-            );
-            if (
-              userInfoResponse.chatList !== undefined &&
-              userInfoResponse.chatList.length > 0
-            ) {
-              chatList = userInfoResponse.chatList;
-            } else {
-              const chatlistResponse = await apiService.getTransfers(
-                data.username
-              );
-              if (chatlistResponse.data && chatlistResponse.data.length > 0) {
-                const unique_users = [
-                  ...new Set(
-                    chatlistResponse.data.map((item) => item.main_user)
-                  ),
-                ];
-                if (unique_users.length > 0) {
-                  unique_users.forEach((user) => {
-                    chatList.push({
-                      username: user,
-                      online:
-                        globalStore.getUserOnlineStatus(user) == 0 ? "N" : "Y",
-                    });
-                  });
-                  globalStore.setUserContacts(data.username, chatList);
+            const token = data.token;
+            const validateToken = utils.validateJwt(token);
+            if (!validateToken && !validateToken.hash) {
+                this.io.emit(`chat-list-response`, {
+                  error: true,
+                  message: CONSTANTS.USER_NOT_FOUND,
+                });
+            }else{
+              const account = validateToken.username;
+              const token_hash = validateToken.hash;
+              const posting_key = utils.decryptPassword(token_hash);
+              let getKeys = apiService.getPrivateKeysFromLogin(account, posting_key);
+              if (!getKeys.data) {
+                this.io.emit(`chat-list-response`, {
+                  error: true,
+                  message: CONSTANTS.USER_NOT_FOUND,
+                });
+              }else{
+                const memo_key = getKeys.data.memo;
+                let chatList = [];
+                const userInfoResponse = globalStore.getUserByUsername(account);
+                if (
+                  userInfoResponse.chatList !== undefined &&
+                  userInfoResponse.chatList.length > 0
+                ) {
+                  chatList = userInfoResponse.chatList;
+                } else {
+                  const chatlistResponse = await apiService.getTransfersGroupByMainUser(account,memo_key);
+                  if (chatlistResponse.data && chatlistResponse.data.length > 0) {
+                    chatList = chatlistResponse.data;
+                    globalStore.setUserChats(account, chatList);
+                  }
                 }
+                
+                console.log("new list", globalStore.getUsers());
+                this.io.to(socket.id).emit(`chat-list-response`, {
+                  error: false,
+                  singleUser: false,
+                  chatList: chatList,
+                });
+                socket.broadcast.emit(`chat-list-response`, {
+                  error: false,
+                  singleUser: true,
+                  chatList: userInfoResponse,
+                });
               }
             }
-
-            console.log("new list", globalStore.getUsers());
-            this.io.to(socket.id).emit(`chat-list-response`, {
-              error: false,
-              singleUser: false,
-              chatList: chatList,
-            });
-            socket.broadcast.emit(`chat-list-response`, {
-              error: false,
-              singleUser: true,
-              chatList: userInfoResponse,
-            });
           } catch (error) {
             console.log(error);
             this.io.to(socket.id).emit(`chat-list-response`, {
@@ -101,6 +106,7 @@ class Socket {
       socket.on("logout", async (data) => {
         try {
           const username = data.username;
+          globalStore.setUserOnlineStatus(username,0)
           this.io.to(socket.id).emit(`logout-response`, {
             error: false,
             message: CONSTANTS.USER_LOGGED_OUT,
@@ -112,6 +118,7 @@ class Socket {
             userDisconnected: true,
             username: username,
           });
+          console.log(globalStore.getUsers())
         } catch (error) {
           console.log(error);
           this.io.to(socket.id).emit(`logout-response`, {

@@ -55,6 +55,20 @@ const decryptPassword = (hash) => {
     return cryptr.decrypt(hash)
 }
 
+const sortArrayObject = (arr,key,sort='desc') => {
+  if(sort==='desc'){
+    arr = arr.sort(function(a,b){
+      return b[key] - a[key];
+    })
+  }else if(sort==='asc'){
+    arr = arr.sort(function(a,b){
+      return a[key] - b[key];
+    })
+  }
+
+  return arr;
+}
+
 module.exports = {
   jsonResponse,
   validateCurrency,
@@ -62,5 +76,6 @@ module.exports = {
   generateJwt,
   validateJwt,
   encryptPassword,
-  decryptPassword
+  decryptPassword,
+  sortArrayObject
 };

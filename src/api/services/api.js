@@ -4,6 +4,7 @@ const dhive = require("@hiveio/dhive");
 const utils = require("./utils");
 const _ = require("lodash");
 const moment = require("moment");
+const globalStore = require("./../globals/store")
 
 const nodes = [
   "https://api.hive.blog",
@@ -178,7 +179,7 @@ const getAccountHistory = async (account, start = -1, limit = 1000) => {
 
 const getTransfers = async (
   account_from,
-  memo_key_decrypted="",
+  memo_key_decrypted = "",
   account_to = ""
 ) => {
   let response = { data: null, error: null };
@@ -202,8 +203,8 @@ const getTransfers = async (
           amount_arr[0] = Number(amount_arr[0]);
           const time_value = moment.utc(trx[1].timestamp).valueOf();
           const main_user = data.from === account_from ? data.to : data.from;
-          let decoded = ''
-          if(memo_key_decrypted){
+          let decoded = "";
+          if (memo_key_decrypted) {
             decoded = decryptMemo(data.memo, memo_key_decrypted).data || "";
           }
           let transfer = {
@@ -230,6 +231,34 @@ const getTransfers = async (
   return response;
 };
 
+const getTransfersGroupByMainUser = async (account, memo_key = "") => {
+  let response = { data: null, error: null };
+  let chatList = [];
+  try {
+    const transfers = await getTransfers(account, memo_key);
+    if (transfers.data) {
+      const transferData = transfers.data;
+      const unique_users = [
+        ...new Set(transferData.map((item) => item.main_user)),
+      ];
+      if (unique_users && unique_users.length > 0) {
+        unique_users.forEach((user) => {
+          let messages = transferData.filter((x) => x.main_user === user);
+          chatList.push({
+            username: user,
+            messages: utils.sortArrayObject(messages,'number','asc'),
+            online: globalStore.getUserOnlineStatus(user),
+          });
+        });
+      }
+    }
+    response.data = chatList;
+  } catch (error) {
+    response.error = error ? error : "No data fetched";
+  }
+  return response;
+};
+
 module.exports = {
   getAccount,
   getPrivateKeysFromLogin,
@@ -240,5 +269,6 @@ module.exports = {
   decryptMemo,
   broadcastTransfer,
   getAccountHistory,
-  getTransfers
+  getTransfers,
+  getTransfersGroupByMainUser,
 };
