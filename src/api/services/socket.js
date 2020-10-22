@@ -2,6 +2,7 @@ const CONSTANTS = require("../config/constants");
 const apiService = require("./api");
 const utils = require("./utils")
 const globalStore = require("./../globals/store");
+const message = require("../controllers/message");
 
 class Socket {
   constructor(socket) {
@@ -61,32 +62,30 @@ class Socket {
                   message: CONSTANTS.USER_NOT_FOUND,
                 });
               }else{
+                globalStore.setUserOnlineStatus(account,1)
                 const memo_key = getKeys.data.memo;
-                let chatList = [];
-                const userInfoResponse = globalStore.getUserByUsername(account);
-                if (
-                  userInfoResponse.chatList !== undefined &&
-                  userInfoResponse.chatList.length > 0
-                ) {
-                  chatList = userInfoResponse.chatList;
-                } else {
-                  const chatlistResponse = await apiService.getTransfersGroupByMainUser(account,memo_key);
-                  if (chatlistResponse.data && chatlistResponse.data.length > 0) {
-                    chatList = chatlistResponse.data;
-                    globalStore.setUserChats(account, chatList);
-                  }
+                let chatList = []
+                const chatlistResponse = await apiService.getTransfersGroupByMainUser(account,memo_key);
+                if (chatlistResponse.data && chatlistResponse.data.length > 0) {
+                  chatList = chatlistResponse.data;
+                  globalStore.setUserChats(account, chatList);
                 }
-                
-                console.log("new list", globalStore.getUsers());
+                // console.log("new list", globalStore.getUsers());
                 this.io.to(socket.id).emit(`chat-list-response`, {
                   error: false,
                   singleUser: false,
                   chatList: chatList,
                 });
+
                 socket.broadcast.emit(`chat-list-response`, {
                   error: false,
                   singleUser: true,
-                  chatList: userInfoResponse,
+                  chatList: [
+                    { username: account, 
+                      online: globalStore.getUserOnlineStatus(account),
+                      messages: chatList.messages !== undefined ? chatList.messages : []
+                    }  
+                  ],
                 });
               }
             }
@@ -118,9 +117,7 @@ class Socket {
             userDisconnected: true,
             username: username,
           });
-          console.log(globalStore.getUsers())
         } catch (error) {
-          console.log(error);
           this.io.to(socket.id).emit(`logout-response`, {
             error: true,
             message: CONSTANTS.SERVER_ERROR_MESSAGE,

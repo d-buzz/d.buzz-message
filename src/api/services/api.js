@@ -4,7 +4,7 @@ const dhive = require("@hiveio/dhive");
 const utils = require("./utils");
 const _ = require("lodash");
 const moment = require("moment");
-const globalStore = require("./../globals/store")
+const globalStore = require("./../globals/store");
 
 const nodes = [
   "https://api.hive.blog",
@@ -57,7 +57,6 @@ const getPrivateKeysFromLogin = (account, password) => {
   } catch (error) {
     response.error = error ? error : "Invalid posting key";
   }
-
   return response;
 };
 
@@ -231,11 +230,14 @@ const getTransfers = async (
   return response;
 };
 
-const getTransfersGroupByMainUser = async (account, memo_key = "") => {
+const getTransfersGroupByMainUser = async (
+  account_from,
+  memo_key = ""
+) => {
   let response = { data: null, error: null };
   let chatList = [];
   try {
-    const transfers = await getTransfers(account, memo_key);
+    const transfers = await getTransfers(account_from, memo_key);
     if (transfers.data) {
       const transferData = transfers.data;
       const unique_users = [
@@ -246,7 +248,7 @@ const getTransfersGroupByMainUser = async (account, memo_key = "") => {
           let messages = transferData.filter((x) => x.main_user === user);
           chatList.push({
             username: user,
-            messages: utils.sortArrayObject(messages,'number','asc'),
+            messages: utils.sortArrayObject(messages, "number", "asc"),
             online: globalStore.getUserOnlineStatus(user),
           });
         });
