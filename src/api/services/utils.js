@@ -52,7 +52,7 @@ const encryptPassword = (password) => {
 }
 
 const decryptPassword = (hash) => {
-    return cryptr.decrypt(hash)
+  return cryptr.decrypt(hash);
 }
 
 const sortArrayObject = (arr,key,sort='desc') => {

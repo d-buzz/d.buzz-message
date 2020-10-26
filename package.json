@@ -4,7 +4,8 @@
   "description": "Private messaging service for D.buzz",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon ./src/server",
+    "start": "node ./src/server",
+    "dev": "nodemon ./src/server",
     "init": "node ./init",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

@@ -305,7 +305,7 @@ const getAllTransfersToUser = async (req, res) => {
         )
       );
     }
-    messages = history.data;
+    messages = utils.sortArrayObject(history.data, "number", "asc");
     return res.json(utils.jsonResponse(messages, CONSTANTS.DATA_FETCH_OK));
   } catch (error) {
     return res.json(

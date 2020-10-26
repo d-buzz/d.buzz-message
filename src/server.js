@@ -5,7 +5,7 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const dotenv = require("dotenv");
 const api = require("./api");
-const { socketEvents } = require("./api/services")
+const { socketEvents } = require("./api/services");
 
 class Server {
   constructor() {
@@ -29,8 +29,8 @@ class Server {
       });
     });
     this.app.use("/api/v1", api);
-    if(this.env.SOCKET_ENABLE=='true'){
-      new socketEvents(this.socket).socketConfig()
+    if (this.env.SOCKET_ENABLE == "true") {
+      new socketEvents(this.socket).socketConfig();
     }
   }
 
@@ -38,9 +38,9 @@ class Server {
     this.appConfig();
     this.includeRoutes();
     const port = this.env.port || 3020;
-    const host = this.env.host || `localhost`;      
+    const host = this.env.host || `localhost`;
     this.http.listen(port, host, () => {
-        console.log(`Listening on http://${host}:${port}`);
+      console.log(`Listening on http://${host}:${port}`);
     });
   }
 }
