@@ -1,6 +1,8 @@
 const config = require("../config/appConfig");
 const CONSTANTS = require("../config/constants");
 const { utils, apiService } = require("./../services");
+const globalStore = require("./../globals/store");
+const moment = require("moment");
 // Sends message (encrypted or not)
 // params: message|string, account_from|string,
 // params: account_to|string, use_encrypt|number, amount|float, currency|string
@@ -16,7 +18,7 @@ const sendMessage = async (req, res) => {
       currency,
     } = req.body;
 
-    const asset = currency ? currency : config.CURRENCY;
+    const asset = currency ? currency.toUpperCase() : config.CURRENCY;
 
     const posting_key = utils.decryptPassword(hash);
     let getKeys = apiService.getPrivateKeysFromLogin(account_from, posting_key);
@@ -32,9 +34,11 @@ const sendMessage = async (req, res) => {
 
     const memo_key = getKeys.data.memo;
     const active_key = getKeys.data.active;
-    const useEncrypt = use_encrypt
+    const useEncrypt = use_encrypt !== null
       ? parseInt(use_encrypt) == 1
       : config.ENCRYPT_MSG;
+
+      console.log('useEncrypt:',useEncrypt)
     if (useEncrypt && !memo_key) {
       return res.json(
         utils.jsonResponse(
@@ -186,6 +190,24 @@ const sendMessage = async (req, res) => {
         )
       );
     }
+
+    if(config.SOCKET_ENABLE === "true"){
+      let newData = {
+        amount: amount,
+        asset: asset,
+        decoded: useEncrypt ? `# ${message}` : '',
+        memo: memo,
+        main_user: account_to,
+        from: account_from,
+        to: account_to,
+        trx_id: transfer.data.id,
+        number: transfer.data.block_num,
+        time: moment().format()
+      }
+      globalStore.pushNewMessage(account_from,account_to,newData);
+      globalStore.pushNewMessage(account_to,account_from,newData);
+    }
+
     return res.json(
       utils.jsonResponse(transfer.data, CONSTANTS.MESSAGE_SEND_OK)
     );

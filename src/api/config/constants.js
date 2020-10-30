@@ -11,6 +11,7 @@ const _this = {
     RECEIVER_NOT_FOUND: `account to is required`,
     USER_NOT_FOUND: `user does not exists`,
     TOKEN_NOT_FOUND: `token is required`,
+    USER_LOGGED_OUT: `user successfully logged out`,
 
     ACCOUNT_INVALID: `invalid account`,
     PASSWORD_INVALID: `invalid password`,

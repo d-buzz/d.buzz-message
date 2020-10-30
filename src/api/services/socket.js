@@ -21,6 +21,8 @@ class Socket {
               socketId: socket.id,
             });
             globalStore.setUsers(this.users);
+          }else{
+            globalStore.setUserSocketId(username,socket.id)
           }
         }
         console.log("users: ", globalStore.getUsers());
@@ -64,12 +66,21 @@ class Socket {
                 globalStore.setUserOnlineStatus(account,1)
                 const memo_key = getKeys.data.memo;
                 let chatList = []
-                const chatlistResponse = await apiService.getTransfersGroupByMainUser(account,memo_key);
-                if (chatlistResponse.data && chatlistResponse.data.length > 0) {
-                  chatList = chatlistResponse.data;
-                  globalStore.setUserChats(account, chatList);
+
+                const getUser = globalStore.getUserByUsername(account);
+                if(getUser.chatList !== undefined && getUser.chatList.length > 0){
+                  chatList = getUser.chatList;
+                  chatList.map((chat) => {
+                    chat.online = globalStore.getUserOnlineStatus(chat.username);
+                    return chat;
+                  })
+                }else{
+                  const chatlistResponse = await apiService.getTransfersGroupByMainUser(account,memo_key);
+                  if (chatlistResponse.data && chatlistResponse.data.length > 0) {
+                    chatList = chatlistResponse.data;
+                    globalStore.setUserChats(account, chatList);
+                  }
                 }
-                // console.log("new list", globalStore.getUsers());
                 this.io.to(socket.id).emit(`chat-list-response`, {
                   error: false,
                   singleUser: false,
@@ -82,7 +93,7 @@ class Socket {
                   chatList: [
                     { username: account, 
                       online: globalStore.getUserOnlineStatus(account),
-                      messages: chatList.messages !== undefined ? chatList.messages : []
+                      messages: []
                     }  
                   ],
                 });
@@ -92,11 +103,44 @@ class Socket {
             console.log(error);
             this.io.to(socket.id).emit(`chat-list-response`, {
               error: true,
-              chatList: [],
+              message: error.message
             });
           }
         }
       });
+
+      /**
+			* send the messages to the user
+			*/
+			socket.on(`add-message`, async (data) => {
+				if (data.message === '') {
+					this.io.to(socket.id).emit(`add-message-response`,{
+						error : true,
+						message: CONSTANTS.MESSAGE_NOT_FOUND
+					}); 
+				}else if(data.from === ''){
+					this.io.to(socket.id).emit(`add-message-response`,{
+						error : true,
+						message: CONSTANTS.SENDER_NOT_FOUND
+					}); 
+				}else if(data.to === ''){
+					this.io.to(socket.id).emit(`add-message-response`,{
+						error : true,
+						message: CONSTANTS.RECEIVER_NOT_FOUND
+					}); 
+				}else{
+					try {
+            const toUser = globalStore.getUserByUsername(data.to)
+            const toSocketId = toUser ? toUser.socketId : '';
+						this.io.to(toSocketId).emit(`add-message-response`,data); 
+					} catch (error) {
+						this.io.to(socket.id).emit(`add-message-response`,{
+							error : true,
+							message : CONSTANTS.MESSAGE_SEND_FAILED
+						}); 
+					}
+				}				
+			});
 
       /**
        * Logout the user

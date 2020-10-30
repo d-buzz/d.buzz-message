@@ -1,7 +1,7 @@
 const config = require("../config/appConfig");
 const CONSTANTS = require("../config/constants");
 const jwt = require("jsonwebtoken");
-const Cryptr = require('cryptr');
+const Cryptr = require("cryptr");
 const cryptr = new Cryptr(config.CRYPTR_SECRET_KEY);
 
 const jsonResponse = (
@@ -20,7 +20,9 @@ const validateCurrency = (currency) => {
   let valid = false;
   const CURRENCIES = config.ALLOWED_CURRENCIES;
   if (CURRENCIES && CURRENCIES.length > 0) {
-    valid = CURRENCIES.filter((x) => x === currency).length > 0;
+    valid =
+      CURRENCIES.filter((x) => x.toLowerCase() === currency.toLowerCase())
+        .length > 0;
   }
   return valid;
 };
@@ -48,26 +50,26 @@ const validateJwt = (token) => {
 };
 
 const encryptPassword = (password) => {
-    return cryptr.encrypt(password)
-}
+  return cryptr.encrypt(password);
+};
 
 const decryptPassword = (hash) => {
   return cryptr.decrypt(hash);
-}
+};
 
-const sortArrayObject = (arr,key,sort='desc') => {
-  if(sort==='desc'){
-    arr = arr.sort(function(a,b){
+const sortArrayObject = (arr, key, sort = "desc") => {
+  if (sort === "desc") {
+    arr = arr.sort(function (a, b) {
       return b[key] - a[key];
-    })
-  }else if(sort==='asc'){
-    arr = arr.sort(function(a,b){
+    });
+  } else if (sort === "asc") {
+    arr = arr.sort(function (a, b) {
       return a[key] - b[key];
-    })
+    });
   }
 
   return arr;
-}
+};
 
 module.exports = {
   jsonResponse,
@@ -77,5 +79,5 @@ module.exports = {
   validateJwt,
   encryptPassword,
   decryptPassword,
-  sortArrayObject
+  sortArrayObject,
 };
