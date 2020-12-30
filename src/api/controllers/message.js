@@ -1,7 +1,7 @@
-const config = require("../config/appConfig");
-const CONSTANTS = require("../config/constants");
-const { utils, apiService } = require("./../services");
-const globalStore = require("./../globals/store");
+const config = require("../../config/appConfig");
+const CONSTANTS = require("../../config/constants");
+const { utils, apiService } = require("./../../services");
+const globalStore = require("../../globals/store");
 const moment = require("moment");
 // Sends message (encrypted or not)
 // params: message|string, account_from|string,

@@ -1,5 +1,5 @@
 const { utils } = require("./../services");
-const CONSTANTS = require("./../config/constants");
+const CONSTANTS = require("../config/constants");
 
 module.exports = (req, res, next) => {
   const token = req.headers.authorization;

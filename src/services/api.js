@@ -4,7 +4,7 @@ const dhive = require("@hiveio/dhive");
 const utils = require("./utils");
 const _ = require("lodash");
 const moment = require("moment");
-const globalStore = require("./../globals/store");
+const globalStore = require("../globals/store");
 
 const nodes = [
   "https://api.hive.blog",

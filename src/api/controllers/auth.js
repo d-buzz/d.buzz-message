@@ -1,6 +1,6 @@
-const { utils, apiService } = require("./../services");
-const CONSTANTS = require("./../config/constants");
-const globalStore = require("./../globals/store");
+const { utils, apiService } = require("./../../services");
+const CONSTANTS = require("../../config/constants");
+const globalStore = require("../../globals/store");
 // authenticate using username & password
 // params: username|string, password|string
 const authenticate = async (req, res) => {

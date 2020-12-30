@@ -1,6 +1,6 @@
-const { utils, apiService } = require("./../services");
-const globalStore = require("./../globals/store");
-const CONSTANTS = require("./../config/constants");
+const { utils, apiService } = require("./../../services");
+const globalStore = require("../../globals/store");
+const CONSTANTS = require("../../config/constants");
 
 const getAccount = async (req, res) => {
   try {

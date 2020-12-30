@@ -5,7 +5,7 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const dotenv = require("dotenv");
 const api = require("./api");
-const { socketEvents } = require("./api/services");
+const { socketEvents } = require("./services");
 
 class Server {
   constructor() {

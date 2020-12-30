@@ -1,7 +1,7 @@
 const CONSTANTS = require("../config/constants");
 const apiService = require("./api");
 const utils = require("./utils")
-const globalStore = require("./../globals/store");
+const globalStore = require("../globals/store");
 
 class Socket {
   constructor(socket) {

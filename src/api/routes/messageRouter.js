@@ -5,7 +5,7 @@ const {
      getAllTransfers,
      getAllTransfersToUser
 } = require('./../controllers/message');
-const authGuard = require("./../middlewares/authGuard")
+const authGuard = require("../../middlewares/authGuard")
 
 messageRouter.post('/send', authGuard, sendMessage)
 messageRouter.post('/transfers', authGuard, getAllTransfers)
