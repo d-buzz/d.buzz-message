@@ -27,7 +27,7 @@
   "homepage": "https://github.com/d-buzz/d.buzz-message#readme",
   "dependencies": {
     "@hiveio/dhive": "^0.14.1",
-    "@hiveio/hive-js": "^0.8.4",
+    "@hiveio/hive-js": "^0.8.9",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
     "cryptr": "^6.0.2",

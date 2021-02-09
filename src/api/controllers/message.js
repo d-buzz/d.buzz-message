@@ -38,7 +38,6 @@ const sendMessage = async (req, res) => {
       ? parseInt(use_encrypt) == 1
       : config.ENCRYPT_MSG;
 
-      console.log('useEncrypt:',useEncrypt)
     if (useEncrypt && !memo_key) {
       return res.json(
         utils.jsonResponse(
@@ -191,7 +190,7 @@ const sendMessage = async (req, res) => {
       );
     }
 
-    if(config.SOCKET_ENABLE === "true"){
+    if (config.SOCKET_ENABLE === "true") {
       let newData = {
         amount: amount,
         asset: asset,
@@ -204,8 +203,8 @@ const sendMessage = async (req, res) => {
         number: transfer.data.block_num,
         time: moment().format()
       }
-      globalStore.pushNewMessage(account_from,account_to,newData);
-      globalStore.pushNewMessage(account_to,account_from,newData);
+      globalStore.pushNewMessage(account_from, account_to, newData);
+      globalStore.pushNewMessage(account_to, account_from, newData);
     }
 
     return res.json(
@@ -226,7 +225,7 @@ const sendMessage = async (req, res) => {
 // params: account|string
 const getAllTransfers = async (req, res) => {
   try {
-    const { account, hash } = req.body;
+    const { account, hash, useKeychain } = req.body;
 
     if (!account) {
       return res.json(
@@ -237,20 +236,23 @@ const getAllTransfers = async (req, res) => {
         )
       );
     }
-    
-    const posting_key = utils.decryptPassword(hash);
-    let getKeys = apiService.getPrivateKeysFromLogin(account, posting_key);
-    if (!getKeys.data) {
-      return res.json(
-        utils.jsonResponse(
-          null,
-          CONSTANTS.PASSWORD_INVALID,
-          CONSTANTS.SERVER_NOT_FOUND_HTTP_CODE
-        )
-      );
+
+    let memo_key = ""
+    if (!useKeychain && hash) {
+      const posting_key = utils.decryptPassword(hash);
+      let getKeys = apiService.getPrivateKeysFromLogin(account, posting_key);
+      if (!getKeys.data) {
+        return res.json(
+          utils.jsonResponse(
+            null,
+            CONSTANTS.PASSWORD_INVALID,
+            CONSTANTS.SERVER_NOT_FOUND_HTTP_CODE
+          )
+        );
+      }
+      memo_key = getKeys.data.memo;
     }
 
-    let memo_key = getKeys.data.memo;
     const history = await apiService.getTransfers(account, memo_key);
     if (!history.data) {
       return res.json(

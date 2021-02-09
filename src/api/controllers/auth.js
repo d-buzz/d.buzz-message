@@ -73,8 +73,8 @@ const authenticate = async (req, res) => {
       );
     }
 
-    const token = utils.generateJwt(username,password);
-    globalStore.setUserOnlineStatus(username,1)
+    const token = utils.generateJwt(username, password);
+    globalStore.setUserOnlineStatus(username, 1)
     return res.json(utils.jsonResponse(token, CONSTANTS.AUTH_SUCCESS));
   } catch (error) {
     return res.json(
@@ -86,6 +86,32 @@ const authenticate = async (req, res) => {
     );
   }
 };
+
+const generateToken = async (req, res) => {
+  try {
+    const { username } = req.body;
+    if (!username) {
+      return res.json(
+        utils.jsonResponse(
+          null,
+          CONSTANTS.USERNAME_NOT_FOUND,
+          CONSTANTS.SERVER_NOT_FOUND_HTTP_CODE
+        )
+      );
+    }
+    const token = utils.generateJwt(username);
+    globalStore.setUserOnlineStatus(username, 1)
+    return res.json(utils.jsonResponse(token, CONSTANTS.AUTH_SUCCESS));
+  } catch (error) {
+    return res.json(
+      utils.jsonResponse(
+        error,
+        CONSTANTS.AUTH_FAILED,
+        CONSTANTS.SERVER_NOT_FOUND_HTTP_CODE
+      )
+    );
+  }
+}
 
 // authenticate using username & private keys (active and memo)
 // params: username|string, active_key|string, memo_key|string
@@ -176,5 +202,6 @@ const authPrivateKeys = async (req, res) => {
 
 module.exports = {
   authenticate,
-  authPrivateKeys
+  authPrivateKeys,
+  generateToken
 };

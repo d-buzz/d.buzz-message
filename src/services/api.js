@@ -1,5 +1,7 @@
 const config = require("../config/appConfig");
 const hive = require("@hiveio/hive-js");
+const chainTypes = require("@hiveio/hive-js/lib/auth/serializer/src/ChainTypes");
+const makeBitMaskFilter = require("@hiveio/hive-js/lib/auth/serializer/src/makeBitMaskFilter");
 const dhive = require("@hiveio/dhive");
 const utils = require("./utils");
 const _ = require("lodash");
@@ -13,6 +15,10 @@ const nodes = [
   "https://api.hivekings.com",
 ];
 const default_node = config.NODE_DEFAULT || nodes[0];
+
+hive.config.set('rebranded_api', true)
+hive.api.setOptions({ url: "https://api.hive.blog" });
+
 const dhiveClient = (node = "", timeout = 10) => {
   const current_node = node ? node : default_node;
   let options = { timeout: timeout * 1000 };
@@ -158,12 +164,24 @@ const broadcastTransfer = async (payload) => {
 
 const getAccountHistory = async (account, start = -1, limit = 1000) => {
   let response = { data: null, error: null };
+  const op = chainTypes.operations;
+  const filter = makeBitMaskFilter([op.transfer]);
   try {
-    let history = await dhiveClient().database.getAccountHistory(
-      account,
-      start,
-      limit
-    );
+    let history = await new Promise((resolve, reject) => {
+      hive.api.getAccountHistory(
+        account,
+        start,
+        limit,
+        filter[0],
+        filter[1],
+        function (err, result) {
+          if (!err) {
+            resolve(result)
+          } else {
+            reject(err)
+          }
+        });
+    })
     if (history && history.length > 0) {
       history = _.orderBy(history, [0], ["desc"]);
       response.data = history;
@@ -188,15 +206,15 @@ const getTransfers = async (
     if (!history.data) {
       response.error = history.error;
     } else {
-      const transactions = history.data;
-      const result = transactions.filter((x) => {
-        const xdata = x[1].op[1];
-        return x[1].op[0] === "transfer" && !account_to
-          ? true
-          : xdata.from === account_to || xdata.to === account_to;
-      });
-      if (result && result.length > 0) {
-        result.forEach((trx) => {
+      let transactions = history.data;
+      if (account_to) {
+        transactions = transactions.filter((x) => {
+          const xdata = x[1].op[1];
+          return xdata.from === account_to || xdata.to === account_to;
+        });
+      }
+      if (transactions && transactions.length > 0) {
+        transactions.forEach((trx) => {
           let data = trx[1].op[1];
           let amount_arr = data.amount.split(" ");
           amount_arr[0] = Number(amount_arr[0]);
@@ -225,7 +243,7 @@ const getTransfers = async (
       response.data = transfers;
     }
   } catch (error) {
-    esponse.error = error ? error : "No data fetched";
+    response.error = error ? error : "No data fetched";
   }
   return response;
 };

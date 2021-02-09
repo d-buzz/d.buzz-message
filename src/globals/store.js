@@ -58,6 +58,20 @@ let _store = {
       }
     }
   },
+  setUserTransfers: (username, transfers) => {
+    const index = _store.getUserIndex("username", username);
+    if (index > -1) {
+      if (transfers && transfers.length > 0) {
+        _store.users[index].transfers = transfers;
+      }
+    }
+  },
+  clearUserChats: (username) => {
+    const index = _store.getUserIndex("username", username);
+    if (index > -1) {
+      _store.users[index].chatList = [];
+    }
+  },
   pushNewMessage: (username, chatUsername, messageObj) => {
     const index = _store.getUserIndex("username", username);
     if (index > -1) {
@@ -73,7 +87,7 @@ let _store = {
           userObj.chatList[msgIndex].messages.length > 0
         ) {
           userObj.chatList[msgIndex].messages.push(messageObj);
-        }else{
+        } else {
           userObj.chatList.push({
             username: chatUsername,
             messages: [messageObj],

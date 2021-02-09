@@ -15,9 +15,24 @@ module.exports = (req, res, next) => {
   }
   try {
     const validateToken = utils.validateJwt(token);
-    if (validateToken && validateToken.hash) {
+    if (validateToken) {
+      req.body.useKeychain = validateToken.useKeychain
       req.body.hash = validateToken.hash;
-      return next();
+      if (validateToken.useKeychain) {
+        return next();
+      } else {
+        if (validateToken.hash) {
+          return next();
+        } else {
+          return res.json(
+            utils.jsonResponse(
+              null,
+              CONSTANTS.SIGN_INVALID,
+              CONSTANTS.SERVER_NOT_FOUND_HTTP_CODE
+            )
+          );
+        }
+      }
     } else {
       return res.json(
         utils.jsonResponse(

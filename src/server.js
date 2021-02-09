@@ -37,7 +37,7 @@ class Server {
   appExecute() {
     this.appConfig();
     this.includeRoutes();
-    const port = this.env.port || 3020;
+    const port = this.env.port || 3021;
     const host = this.env.host || `localhost`;
     this.http.listen(port, host, () => {
       console.log(`Listening on http://${host}:${port}`);

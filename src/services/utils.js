@@ -39,8 +39,13 @@ const validateMemo = (memo) => {
   return valid;
 };
 
-const generateJwt = (username, posting_key) => {
-  const payload = { username, hash: encryptPassword(posting_key) };
+const generateJwt = (username, posting_key = "") => {
+  let payload = { username, hash: "", useKeychain: false };
+  if (posting_key) {
+    payload.hash = encryptPassword(posting_key)
+  } else {
+    payload.useKeychain = true
+  }
   const token = jwt.sign(payload, config.JWT_SECRET_KEY, { expiresIn: "1d" });
   return token;
 };
