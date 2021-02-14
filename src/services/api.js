@@ -174,13 +174,13 @@ const getAccountHistory = async (account, start = -1, limit = 1000) => {
         limit,
         filter[0],
         filter[1],
-        function (err, result) {
+        ((err, result) => {
           if (!err) {
             resolve(result)
           } else {
             reject(err)
           }
-        });
+        }))
     })
     if (history && history.length > 0) {
       history = _.orderBy(history, [0], ["desc"]);
@@ -279,6 +279,30 @@ const getTransfersGroupByMainUser = async (
   return response;
 };
 
+const lookupAccounts = async (account, limit = 10) => {
+  let response = { data: null, error: null };
+  let accounts = []
+  try {
+    accounts = await new Promise((resolve, reject) => {
+      hive.api.lookupAccounts(account, limit,
+        ((err, result) => {
+          if (!err) {
+            resolve(result)
+          } else {
+            reject(err)
+          }
+        }))
+    });
+
+    response.data = accounts
+  } catch (error) {
+    response.error = error ? error : "No data fetched";
+  }
+
+  return response;
+
+}
+
 module.exports = {
   getAccount,
   getPrivateKeysFromLogin,
@@ -291,4 +315,5 @@ module.exports = {
   getAccountHistory,
   getTransfers,
   getTransfersGroupByMainUser,
+  lookupAccounts
 };

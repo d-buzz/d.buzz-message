@@ -81,7 +81,43 @@ const getAccountContacts = async (req, res) => {
   }
 };
 
+const searchAccounts = async (req, res) => {
+  try {
+    const { account, limit = 10 } = req.params;
+    if (!account) {
+      return res.json(
+        utils.jsonResponse(
+          null,
+          CONSTANTS.ACCOUNT_NOT_FOUND,
+          CONSTANTS.SERVER_NOT_FOUND_HTTP_CODE
+        )
+      );
+    }
+
+    const accounts = await apiService.lookupAccounts(account, limit)
+    if (!accounts.data) {
+      return res.json(
+        utils.jsonResponse(
+          null,
+          accounts.error,
+          CONSTANTS.SERVER_NOT_FOUND_HTTP_CODE
+        )
+      );
+    }
+    return res.json(utils.jsonResponse(accounts.data, CONSTANTS.DATA_FETCH_OK));
+  } catch (error) {
+    return res.json(
+      utils.jsonResponse(
+        error,
+        CONSTANTS.DATA_FETCH_FAILED,
+        CONSTANTS.SERVER_NOT_FOUND_HTTP_CODE
+      )
+    );
+  }
+}
+
 module.exports = {
   getAccount,
   getAccountContacts,
+  searchAccounts
 };

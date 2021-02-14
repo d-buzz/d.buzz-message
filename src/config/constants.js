@@ -1,10 +1,10 @@
 const _this = {
     /* Validation related  constants starts*/
-    USERNAME_NOT_FOUND : `username is required`,
+    USERNAME_NOT_FOUND: `username is required`,
     PASSWORD_NOT_FOUND: `password is required`,
     ACCOUNT_NOT_FOUND: `account is required`,
-    ACTIVEKEY_NOT_FOUND: `active key is required`, 
-    MEMOKEY_NOT_FOUND: `memo key is required`, 
+    ACTIVEKEY_NOT_FOUND: `active key is required`,
+    MEMOKEY_NOT_FOUND: `memo key is required`,
     MESSAGE_NOT_FOUND: `message is required`,
     AMOUNT_NOT_FOUND: `amount is required`,
     SENDER_NOT_FOUND: `account from is required`,
@@ -34,10 +34,10 @@ const _this = {
     /* Validation related  constants ends*/
 
     /* HTTP status code constant starts */
-    SERVER_ERROR_HTTP_CODE : 412,
-    SERVER_NOT_ALLOWED_HTTP_CODE : 503,
-    SERVER_OK_HTTP_CODE : 200,  
-    SERVER_NOT_FOUND_HTTP_CODE : 400,
+    SERVER_ERROR_HTTP_CODE: 412,
+    SERVER_NOT_ALLOWED_HTTP_CODE: 503,
+    SERVER_OK_HTTP_CODE: 200,
+    SERVER_NOT_FOUND_HTTP_CODE: 400,
     /* HTTP status codeconstant ends */
 }
 
