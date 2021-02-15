@@ -13,19 +13,14 @@ class Socket {
       try {
         if (socket.request._query["username"] !== undefined) {
           const username = socket.request._query["username"];
-          const exists =
-            this.users.filter((x) => x.username === username).length > 0;
+          const exists = await globalStore.checkUserExist(username)
           if (!exists) {
-            this.users.push({
-              username: username,
-              socketId: socket.id,
-            });
-            globalStore.setUsers(this.users);
+            globalStore.saveUser(username, { socketId: socket.id, online: 0 })
           } else {
-            globalStore.setUserSocketId(username, socket.id)
+            await globalStore.updateSocketId(username, socket.id)
           }
+
         }
-        // console.log("users: ", globalStore.getUsers());
         next();
       } catch (error) {
         console.error("error: ", error);
@@ -64,7 +59,7 @@ class Socket {
                   memo_key = getKeys.data.memo;
                 }
               }
-              globalStore.setUserOnlineStatus(account, 1)
+              await globalStore.setUserOnlineStatus(account, 1)
               let chatList = []
               let transfers = []
               const chatlistResponse = await apiService.getTransfers(account, memo_key);
@@ -76,15 +71,20 @@ class Socket {
                 if (unique_users && unique_users.length > 0) {
                   unique_users.forEach((user) => {
                     let messages = transfers.filter((x) => x.main_user === user);
+                    const lastNumber = Math.max.apply(Math, messages.map(function (o) { return o.number; }))
+                    const lastChatDate = messages.filter((x) => x.number === lastNumber);
                     chatList.push({
                       username: user,
                       messages: utils.sortArrayObject(messages, "number", "asc"),
-                      online: globalStore.getUserOnlineStatus(user),
+                      lastNumber,
+                      lastDate: lastChatDate.length > 0 ? lastChatDate[0].time : ""
                     });
                   });
                 }
               }
-              globalStore.setUserChats(account, chatList)
+              const getOnlineStatuses = await globalStore.mapArrayOnlineStatus("username", chatList)
+              await Promise.all([getOnlineStatuses])
+
               this.io.to(socket.id).emit(`chat-list-response`, {
                 error: false,
                 singleUser: false,
@@ -97,7 +97,7 @@ class Socket {
                 chatList: [
                   {
                     username: account,
-                    online: globalStore.getUserOnlineStatus(account),
+                    online: await globalStore.getUserOnlineStatus(account),
                     messages: []
                   }
                 ],
@@ -134,7 +134,7 @@ class Socket {
           });
         } else {
           try {
-            const toUser = globalStore.getUserByUsername(data.to)
+            const toUser = await globalStore.checkUserExist(data.to)
             const toSocketId = toUser ? toUser.socketId : '';
             this.io.to(toSocketId).emit(`add-message-response`, data);
           } catch (error) {
@@ -152,8 +152,7 @@ class Socket {
       socket.on("logout", async (data) => {
         try {
           const username = data.username;
-          globalStore.setUserOnlineStatus(username, 0)
-          globalStore.clearUserChats(username);
+          await globalStore.setUserOnlineStatus(username, 0)
           this.io.to(socket.id).emit(`logout-response`, {
             error: false,
             message: CONSTANTS.USER_LOGGED_OUT,
@@ -179,7 +178,7 @@ class Socket {
        */
       socket.on("disconnect", async () => {
         const username = socket.request._query["username"]
-        globalStore.setUserOnlineStatus(username, 0)
+        await globalStore.setUserOnlineStatus(username, 0)
         socket.broadcast.emit(`chat-list-response`, {
           error: false,
           userDisconnected: true,

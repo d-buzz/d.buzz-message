@@ -2,6 +2,7 @@ const { utils, apiService } = require("./../../services");
 const globalStore = require("../../globals/store");
 const CONSTANTS = require("../../config/constants");
 
+// get specific hive account metadata
 const getAccount = async (req, res) => {
   try {
     const { account } = req.params;
@@ -34,6 +35,7 @@ const getAccount = async (req, res) => {
   }
 };
 
+// get account contacts with message/transfer history
 const getAccountContacts = async (req, res) => {
   try {
     const { account } = req.body;
@@ -65,10 +67,12 @@ const getAccountContacts = async (req, res) => {
       unique_users.forEach((user) => {
         chatList.push({
           username: user,
-          online: globalStore.getUserOnlineStatus(user),
         });
       });
     }
+
+    const getOnlineStatuses = await globalStore.mapArrayOnlineStatus("username", chatList)
+    await Promise.all([getOnlineStatuses])
     return res.json(utils.jsonResponse(chatList, CONSTANTS.DATA_FETCH_OK));
   } catch (error) {
     return res.json(
@@ -81,6 +85,7 @@ const getAccountContacts = async (req, res) => {
   }
 };
 
+// search hive accounts
 const searchAccounts = async (req, res) => {
   try {
     const { account, limit = 10 } = req.params;
@@ -116,8 +121,41 @@ const searchAccounts = async (req, res) => {
   }
 }
 
+// get specific account online status
+const getAccountOnlineStatus = async (req, res) => {
+  try {
+    const { account } = req.params
+    if (!account) {
+      return res.json(
+        utils.jsonResponse(
+          null,
+          CONSTANTS.ACCOUNT_NOT_FOUND,
+          CONSTANTS.SERVER_NOT_FOUND_HTTP_CODE
+        )
+      );
+    }
+
+    const online = await globalStore.getUserOnlineStatus(account);
+    const response = {
+      username: account,
+      online
+    }
+
+    return res.json(utils.jsonResponse(response, CONSTANTS.DATA_FETCH_OK));
+  } catch (error) {
+    return res.json(
+      utils.jsonResponse(
+        error,
+        CONSTANTS.DATA_FETCH_FAILED,
+        CONSTANTS.SERVER_NOT_FOUND_HTTP_CODE
+      )
+    );
+  }
+}
+
 module.exports = {
   getAccount,
   getAccountContacts,
-  searchAccounts
+  searchAccounts,
+  getAccountOnlineStatus
 };

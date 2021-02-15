@@ -267,11 +267,13 @@ const getTransfersGroupByMainUser = async (
           chatList.push({
             username: user,
             messages: utils.sortArrayObject(messages, "number", "asc"),
-            online: globalStore.getUserOnlineStatus(user),
           });
         });
       }
     }
+    const getOnlineStatuses = await globalStore.mapArrayOnlineStatus("username", chatList)
+    await Promise.all([getOnlineStatuses])
+
     response.data = chatList;
   } catch (error) {
     response.error = error ? error : "No data fetched";

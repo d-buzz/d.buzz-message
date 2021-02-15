@@ -1,6 +1,5 @@
 const { utils, apiService } = require("./../../services");
 const CONSTANTS = require("../../config/constants");
-const globalStore = require("../../globals/store");
 // authenticate using username & password
 // params: username|string, password|string
 const authenticate = async (req, res) => {
@@ -74,7 +73,6 @@ const authenticate = async (req, res) => {
     }
 
     const token = utils.generateJwt(username, password);
-    globalStore.setUserOnlineStatus(username, 1)
     return res.json(utils.jsonResponse(token, CONSTANTS.AUTH_SUCCESS));
   } catch (error) {
     return res.json(
@@ -100,7 +98,6 @@ const generateToken = async (req, res) => {
       );
     }
     const token = utils.generateJwt(username);
-    globalStore.setUserOnlineStatus(username, 1)
     return res.json(utils.jsonResponse(token, CONSTANTS.AUTH_SUCCESS));
   } catch (error) {
     return res.json(

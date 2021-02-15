@@ -1,101 +1,83 @@
+const redis = require("./../config/redisConnect")
 let _store = {
-  users: [],
-  setUsers: (values) => {
-    _store.users = values;
-  },
-  getUsers: () => {
-    return _store.users;
-  },
-  getUserIndex: (key, value) => {
-    const users = _store.users;
-    let index = -1;
-    if (users && users.length > 0) {
-      index = users.map((x) => x[key]).indexOf(value);
-    }
-    return index;
-  },
-  getUserByUsername: (username) => {
-    const index = _store.getUserIndex("username", username);
-    let data = "";
-    if (index > -1) {
-      data = _store.users[index];
-    }
-    return data;
-  },
-  getUserBySocketId: (socketId) => {
-    const index = _store.getUserIndex("socketId", socketId);
-    let data = "";
-    if (index > -1) {
-      data = _store.users[index];
-    }
-    return data;
-  },
-  getUserOnlineStatus: (username) => {
-    const user = _store.getUserByUsername(username);
-    let isOnline = 0;
-    if (user) {
-      isOnline = user.isOnline !== undefined ? user.isOnline : 0;
-    }
-    return isOnline;
-  },
-  setUserOnlineStatus: (username, status) => {
-    const index = _store.getUserIndex("username", username);
-    if (index > -1) {
-      _store.users[index].isOnline = status;
-    }
-  },
-  setUserSocketId: (username, socketId) => {
-    const index = _store.getUserIndex("username", username);
-    if (index > -1) {
-      _store.users[index].socketId = socketId;
-    }
-  },
-  setUserChats: (username, chatList) => {
-    const index = _store.getUserIndex("username", username);
-    if (index > -1) {
-      if (chatList && chatList.length > 0) {
-        _store.users[index].chatList = chatList;
-      }
-    }
-  },
-  setUserTransfers: (username, transfers) => {
-    const index = _store.getUserIndex("username", username);
-    if (index > -1) {
-      if (transfers && transfers.length > 0) {
-        _store.users[index].transfers = transfers;
-      }
-    }
-  },
-  clearUserChats: (username) => {
-    const index = _store.getUserIndex("username", username);
-    if (index > -1) {
-      _store.users[index].chatList = [];
-    }
-  },
-  pushNewMessage: (username, chatUsername, messageObj) => {
-    const index = _store.getUserIndex("username", username);
-    if (index > -1) {
-      const userObj = _store.users[index];
-      const chatList = userObj.chatList;
-      if (chatList !== undefined && chatList.length > 0) {
-        const msgIndex = userObj.chatList
-          .map((x) => x.username)
-          .indexOf(chatUsername);
-        if (
-          msgIndex !== -1 &&
-          userObj.chatList[msgIndex].messages !== undefined &&
-          userObj.chatList[msgIndex].messages.length > 0
-        ) {
-          userObj.chatList[msgIndex].messages.push(messageObj);
-        } else {
-          userObj.chatList.push({
-            username: chatUsername,
-            messages: [messageObj],
-            online: 1
-          })
+  getRedisByKey: (key) => {
+    return new Promise((resolve, reject) => {
+      redis.get(key, (err, data) => {
+        if (err) {
+          reject(err)
+          return
         }
-      }
+
+        if (data === null) {
+          resolve(null)
+          return
+        }
+
+        try {
+          resolve(
+            JSON.parse(data)
+          )
+        } catch (ex) {
+          resolve(data)
+        }
+      })
+    })
+  },
+
+  // check if key username exists
+  checkUserExist: async (username) => {
+    return await _store.getRedisByKey(username);
+  },
+
+  // save new user
+  saveUser: (username, objVal) => {
+    redis.set(username, JSON.stringify(objVal));
+  },
+
+  //update user socket ID
+  updateSocketId: async (username, socketId) => {
+    const user = await _store.getRedisByKey(username);
+    if (user) {
+      user.socketId = socketId
+      redis.set(username, JSON.stringify(user));
     }
+  },
+
+  // update user online status
+  setUserOnlineStatus: async (username, status) => {
+    const user = await _store.getRedisByKey(username);
+    if (user) {
+      user.online = status
+      redis.set(username, JSON.stringify(user));
+    }
+  },
+
+  // get user online status
+  getUserOnlineStatus: async (username) => {
+    const user = await _store.getRedisByKey(username)
+    return user && user.online !== undefined ? user.online : 0;
+  },
+
+  // map user array online status
+  mapArrayOnlineStatus: (user_key = "username", array) => {
+    return new Promise((resolve, reject) => {
+      let count = 0;
+      try {
+        if (array.length > 0) {
+          array.forEach(async (chat) => {
+            chat.online = await _store.getUserOnlineStatus(chat[user_key]);
+            count++;
+            if (count === array.length) {
+              resolve(true)
+            }
+          })
+        } else {
+          resolve(null)
+        }
+      } catch (error) {
+        reject(error)
+      }
+    });
   },
 };
 

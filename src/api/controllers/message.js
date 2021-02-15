@@ -1,8 +1,6 @@
 const config = require("../../config/appConfig");
 const CONSTANTS = require("../../config/constants");
 const { utils, apiService } = require("./../../services");
-const globalStore = require("../../globals/store");
-const moment = require("moment");
 // Sends message (encrypted or not)
 // params: message|string, account_from|string,
 // params: account_to|string, use_encrypt|number, amount|float, currency|string
@@ -190,23 +188,6 @@ const sendMessage = async (req, res) => {
       );
     }
 
-    if (config.SOCKET_ENABLE === "true") {
-      let newData = {
-        amount: amount,
-        asset: asset,
-        decoded: useEncrypt ? `# ${message}` : '',
-        memo: memo,
-        main_user: account_to,
-        from: account_from,
-        to: account_to,
-        trx_id: transfer.data.id,
-        number: transfer.data.block_num,
-        time: moment().format()
-      }
-      globalStore.pushNewMessage(account_from, account_to, newData);
-      globalStore.pushNewMessage(account_to, account_from, newData);
-    }
-
     return res.json(
       utils.jsonResponse(transfer.data, CONSTANTS.MESSAGE_SEND_OK)
     );
@@ -280,7 +261,7 @@ const getAllTransfers = async (req, res) => {
 // params: account_from|string, account_to|string
 const getAllTransfersToUser = async (req, res) => {
   try {
-    const { account_from, account_to, hash } = req.body;
+    const { account_from, account_to, hash, useKeychain } = req.body;
     let messages = [];
 
     if (!account_from) {
@@ -302,19 +283,22 @@ const getAllTransfersToUser = async (req, res) => {
       );
     }
 
-    const posting_key = utils.decryptPassword(hash);
-    let getKeys = apiService.getPrivateKeysFromLogin(account_from, posting_key);
-    if (!getKeys.data) {
-      return res.json(
-        utils.jsonResponse(
-          null,
-          CONSTANTS.PASSWORD_INVALID,
-          CONSTANTS.SERVER_NOT_FOUND_HTTP_CODE
-        )
-      );
+    let memo_key = ""
+    if (!useKeychain && hash) {
+      const posting_key = utils.decryptPassword(hash);
+      let getKeys = apiService.getPrivateKeysFromLogin(account_from, posting_key);
+      if (!getKeys.data) {
+        return res.json(
+          utils.jsonResponse(
+            null,
+            CONSTANTS.PASSWORD_INVALID,
+            CONSTANTS.SERVER_NOT_FOUND_HTTP_CODE
+          )
+        );
+      }
+      memo_key = getKeys.data.memo;
     }
 
-    const memo_key = getKeys.data.memo;
     const history = await apiService.getTransfers(
       account_from,
       memo_key,
