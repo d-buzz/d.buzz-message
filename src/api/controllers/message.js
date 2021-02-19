@@ -326,8 +326,62 @@ const getAllTransfersToUser = async (req, res) => {
   }
 };
 
+const getTransfersGroupByMainUser = async (req, res) => {
+  try {
+    const { account, hash, useKeychain } = req.body
+
+    if (!account) {
+      return res.json(
+        utils.jsonResponse(
+          null,
+          CONSTANTS.ACCOUNT_NOT_FOUND,
+          CONSTANTS.SERVER_NOT_FOUND_HTTP_CODE
+        )
+      );
+    }
+
+    let memo_key = ""
+    if (!useKeychain && hash) {
+      const posting_key = utils.decryptPassword(hash);
+      let getKeys = apiService.getPrivateKeysFromLogin(account, posting_key);
+      if (!getKeys.data) {
+        return res.json(
+          utils.jsonResponse(
+            null,
+            CONSTANTS.PASSWORD_INVALID,
+            CONSTANTS.SERVER_NOT_FOUND_HTTP_CODE
+          )
+        );
+      }
+      memo_key = getKeys.data.memo;
+    }
+
+    const history = await apiService.getTransfersGroupByMainUser(account, memo_key);
+    if (!history.data) {
+      return res.json(
+        utils.jsonResponse(
+          null,
+          history.error,
+          CONSTANTS.SERVER_NOT_FOUND_HTTP_CODE
+        )
+      );
+    }
+
+    return res.json(utils.jsonResponse(history.data, CONSTANTS.DATA_FETCH_OK));
+  } catch (error) {
+    return res.json(
+      utils.jsonResponse(
+        error.message,
+        CONSTANTS.DATA_FETCH_FAILED,
+        CONSTANTS.SERVER_NOT_FOUND_HTTP_CODE
+      )
+    );
+  }
+}
+
 module.exports = {
   sendMessage,
   getAllTransfers,
   getAllTransfersToUser,
+  getTransfersGroupByMainUser
 };
