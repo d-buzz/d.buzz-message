@@ -188,8 +188,9 @@ const sendMessage = async (req, res) => {
       );
     }
 
+    const response = { ...transfer.data, memo }
     return res.json(
-      utils.jsonResponse(transfer.data, CONSTANTS.MESSAGE_SEND_OK)
+      utils.jsonResponse(response, CONSTANTS.MESSAGE_SEND_OK)
     );
   } catch (error) {
     return res.json(
